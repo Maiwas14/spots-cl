@@ -16,9 +16,13 @@ import { useRegiones } from '@/hooks/useRegiones';
 import { useComunas } from '@/hooks/useComunas';
 import { PostCard } from '@/components/PostCard';
 import { SkeletonGrid } from '@/components/SkeletonCard';
-import { COLORS, CATEGORIAS } from '@/constants';
+import { useColors, CATEGORIAS } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function FeedScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const {
     posts, loading, hasMore,
     regionFilter, comunaFilter, categoriaFilter, searchQuery, sortBy,
@@ -96,7 +100,7 @@ export default function FeedScreen() {
         ))}
       </ScrollView>
 
-      {/* Comuna filter — solo aparece si hay región seleccionada */}
+      {/* Comuna filter */}
       {comunas.length > 0 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow} style={styles.filterScroll}>
           {comunas.map((c) => (
@@ -159,8 +163,8 @@ export default function FeedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -169,7 +173,7 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 8,
   },
-  logo: { fontSize: 26, fontWeight: '800', color: COLORS.text, letterSpacing: -1 },
+  logo: { fontSize: 26, fontWeight: '800', color: C.text, letterSpacing: -1 },
   sortRow: { flexDirection: 'row', gap: 6 },
   sortBtn: {
     flexDirection: 'row',
@@ -177,15 +181,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: COLORS.surface,
+    backgroundColor: C.surface,
   },
-  sortBtnActive: { backgroundColor: COLORS.primary },
-  sortText: { fontSize: 12, color: COLORS.textMuted, fontWeight: '500' },
+  sortBtnActive: { backgroundColor: C.primary },
+  sortText: { fontSize: 12, color: C.textMuted, fontWeight: '500' },
   sortTextActive: { color: '#fff', fontWeight: '600' },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
+    backgroundColor: C.surface,
     marginHorizontal: 14,
     marginBottom: 6,
     borderRadius: 12,
@@ -193,22 +197,17 @@ const styles = StyleSheet.create({
     height: 40,
   },
   searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1, fontSize: 14, color: COLORS.text },
+  searchInput: { flex: 1, fontSize: 14, color: C.text },
   filterScroll: { flexGrow: 0 },
   filterRow: { paddingHorizontal: 14, paddingVertical: 4, gap: 7 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    backgroundColor: COLORS.surface,
-  },
-  chipActive: { backgroundColor: COLORS.primary },
-  chipText: { fontSize: 13, color: COLORS.textMuted, fontWeight: '500' },
+  chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: C.surface },
+  chipActive: { backgroundColor: C.primary },
+  chipText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
   grid: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 100 },
   row: { gap: 12, marginBottom: 12 },
   empty: { flex: 1, alignItems: 'center', paddingTop: 60 },
   emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 18, fontWeight: '700', color: COLORS.text },
-  emptySubtext: { fontSize: 14, color: COLORS.textMuted, marginTop: 4 },
+  emptyText: { fontSize: 18, fontWeight: '700', color: C.text },
+  emptySubtext: { fontSize: 14, color: C.textMuted, marginTop: 4 },
 });

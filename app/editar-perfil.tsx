@@ -18,9 +18,13 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { useUploadImage } from '@/hooks/useUploadImage';
 import { Avatar } from '@/components/Avatar';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function EditarPerfilScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { user, profile, setProfile } = useAuthStore();
   const { uploadAvatar } = useUploadImage();
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
@@ -161,8 +165,8 @@ export default function EditarPerfilScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   navbar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -170,32 +174,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: C.border,
   },
-  navCancel: { fontSize: 16, color: COLORS.textMuted },
-  navTitle: { fontSize: 16, fontWeight: '700', color: COLORS.text },
-  navSave: { fontSize: 16, color: COLORS.text, fontWeight: '700' },
+  navCancel: { fontSize: 16, color: C.textMuted },
+  navTitle: { fontSize: 16, fontWeight: '700', color: C.text },
+  navSave: { fontSize: 16, color: C.text, fontWeight: '700' },
   scroll: { padding: 20, paddingBottom: 40 },
   avatarSection: { alignItems: 'center', marginBottom: 32 },
-  changePhotoText: { fontSize: 14, color: COLORS.primary, fontWeight: '600' },
+  changePhotoText: { fontSize: 14, color: C.primary, fontWeight: '600', marginTop: 10 },
   section: { marginBottom: 20 },
-  sectionLabel: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
+  sectionLabel: { fontSize: 12, fontWeight: '600', color: C.textMuted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: {
-    backgroundColor: COLORS.surface,
+    backgroundColor: C.surface,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 13,
     fontSize: 15,
-    color: COLORS.text,
+    color: C.text,
   },
   textArea: { minHeight: 90, textAlignVertical: 'top' },
-  inputDisabled: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-  },
-  inputDisabledText: { fontSize: 15, color: COLORS.textMuted },
-  hint: { fontSize: 12, color: COLORS.textMuted, marginTop: 6 },
-  charCount: { fontSize: 12, color: COLORS.textMuted, textAlign: 'right', marginTop: 4 },
+  inputDisabled: { backgroundColor: C.surface, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13 },
+  inputDisabledText: { fontSize: 15, color: C.textMuted },
+  hint: { fontSize: 12, color: C.textMuted, marginTop: 6 },
+  charCount: { fontSize: 12, color: C.textMuted, textAlign: 'right', marginTop: 4 },
 });

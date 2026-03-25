@@ -3,12 +3,14 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  KeyboardAvoidingView,
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
   Linking,
   Alert,
   Share,
+  Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
@@ -29,7 +31,8 @@ if (!isExpoGo) {
 import { usePost } from '@/hooks/usePost';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
-import { COLORS, CATEGORIAS } from '@/constants';
+import { useColors, CATEGORIAS } from '@/constants';
+import type { Colors } from '@/constants';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { CommentsSection } from '@/components/CommentsSection';
 import { ZoomableImage } from '@/components/ZoomableImage';
@@ -40,6 +43,9 @@ const { width } = Dimensions.get('window');
 const IMAGE_HEIGHT = width * 0.78;
 
 export default function LugarScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { id } = useLocalSearchParams<{ id: string }>();
   const { post, loading, setPost } = usePost(id);
   const { user } = useAuthStore();
@@ -136,16 +142,14 @@ export default function LugarScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Zoom modal */}
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <ZoomableImage
           uri={zoomUri ?? ''}
           visible={!!zoomUri}
           onClose={() => setZoomUri(null)}
         />
 
-        {/* Hero — carrusel o imagen única */}
         <TouchableOpacity activeOpacity={0.95} onPress={() => setZoomUri(post.imagen_url)} style={styles.imageContainer}>
           {allImages.length > 1 ? (
             <ImageCarousel urls={allImages} height={IMAGE_HEIGHT} />
@@ -163,7 +167,6 @@ export default function LugarScreen() {
         </TouchableOpacity>
 
         <View style={styles.content}>
-          {/* Tags */}
           <View style={styles.tagsRow}>
             {categoria && (
               <View style={styles.tag}>
@@ -186,7 +189,6 @@ export default function LugarScreen() {
           {post.descripcion && <Text style={styles.description}>{post.descripcion}</Text>}
           <Text style={styles.timeAgo}>{timeAgo}</Text>
 
-          {/* Like / Save */}
           <View style={styles.actionsRow}>
             <TouchableOpacity style={[styles.actionBtn, post.user_liked && styles.actionBtnLiked]} onPress={handleLike}>
               <Ionicons name={post.user_liked ? 'heart' : 'heart-outline'} size={18} color={post.user_liked ? '#ef4444' : COLORS.textMuted} />
@@ -200,7 +202,6 @@ export default function LugarScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Navigate */}
           {post.lat && post.lng && (
             <TouchableOpacity style={styles.navigateBtn} onPress={handleNavigate}>
               <Ionicons name="navigate" size={16} color="#fff" />
@@ -208,7 +209,6 @@ export default function LugarScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Map */}
           {post.lat && post.lng && MapView && (
             <View style={styles.mapContainer}>
               <MapView
@@ -224,7 +224,6 @@ export default function LugarScreen() {
             </View>
           )}
 
-          {/* Author */}
           {post.profiles && (
             <TouchableOpacity
               style={styles.authorCard}
@@ -245,26 +244,24 @@ export default function LugarScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Delete */}
           {post.user_id === user?.id && (
             <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
               <Text style={styles.deleteBtnText}>Eliminar lugar</Text>
             </TouchableOpacity>
           )}
 
-          {/* Comments */}
           <CommentsSection postId={post.id} />
         </View>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background },
-  notFound: { fontSize: 18, color: COLORS.text, marginBottom: 12 },
-  backLink: { color: COLORS.primary, fontSize: 16 },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.background },
+  notFound: { fontSize: 18, color: C.text, marginBottom: 12 },
+  backLink: { color: C.primary, fontSize: 16 },
   imageContainer: { position: 'relative' },
   heroImage: { width },
   heroControls: {
@@ -279,23 +276,23 @@ const styles = StyleSheet.create({
   },
   content: { padding: 20 },
   tagsRow: { flexDirection: 'row', gap: 8, marginBottom: 14, flexWrap: 'wrap' },
-  tag: { backgroundColor: COLORS.surface, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
-  tagText: { fontSize: 13, color: COLORS.textMuted, fontWeight: '500' },
-  title: { fontSize: 24, fontWeight: '800', color: COLORS.text, marginBottom: 10, lineHeight: 30, letterSpacing: -0.3 },
-  description: { fontSize: 15, color: COLORS.textMuted, lineHeight: 22, marginBottom: 8 },
-  timeAgo: { fontSize: 12, color: COLORS.textMuted, marginBottom: 20 },
+  tag: { backgroundColor: C.surface, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
+  tagText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
+  title: { fontSize: 24, fontWeight: '800', color: C.text, marginBottom: 10, lineHeight: 30, letterSpacing: -0.3 },
+  description: { fontSize: 15, color: C.textMuted, lineHeight: 22, marginBottom: 8 },
+  timeAgo: { fontSize: 12, color: C.textMuted, marginBottom: 20 },
   actionsRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   actionBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, paddingVertical: 12, borderRadius: 12, backgroundColor: COLORS.surface,
+    gap: 6, paddingVertical: 12, borderRadius: 12, backgroundColor: C.surface,
   },
   actionBtnLiked: { backgroundColor: '#fff0f0' },
   actionBtnSaved: { backgroundColor: '#f0f5f2' },
-  actionBtnText: { fontSize: 14, color: COLORS.textMuted, fontWeight: '500' },
+  actionBtnText: { fontSize: 14, color: C.textMuted, fontWeight: '500' },
   actionBtnTextLiked: { color: '#ef4444' },
-  actionBtnTextSaved: { color: COLORS.primary },
+  actionBtnTextSaved: { color: C.primary },
   navigateBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 12, padding: 15,
+    backgroundColor: C.primary, borderRadius: 12, padding: 15,
     alignItems: 'center', marginBottom: 20, flexDirection: 'row',
     justifyContent: 'center', gap: 8,
   },
@@ -304,16 +301,16 @@ const styles = StyleSheet.create({
   map: { flex: 1 },
   authorCard: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: COLORS.surface, borderRadius: 14, padding: 14, marginBottom: 16,
+    backgroundColor: C.surface, borderRadius: 14, padding: 14, marginBottom: 16,
   },
   authorAvatarImg: { width: 42, height: 42, borderRadius: 21 },
   authorAvatarPlaceholder: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: COLORS.text, alignItems: 'center', justifyContent: 'center',
+    backgroundColor: C.border, alignItems: 'center', justifyContent: 'center',
   },
-  authorAvatarInitial: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  authorLabel: { fontSize: 11, color: COLORS.textMuted },
-  authorUsername: { fontSize: 14, fontWeight: '600', color: COLORS.text },
+  authorAvatarInitial: { color: C.text, fontSize: 17, fontWeight: '700' },
+  authorLabel: { fontSize: 11, color: C.textMuted },
+  authorUsername: { fontSize: 14, fontWeight: '600', color: C.text },
   deleteBtn: { alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: '#fff5f5' },
   deleteBtnText: { color: '#ef4444', fontSize: 14, fontWeight: '500' },
 });

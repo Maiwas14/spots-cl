@@ -3,9 +3,10 @@ import { View, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '@/stores/authStore';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
 
 export default function Index() {
+  const COLORS = useColors();
   const { session, loading } = useAuthStore();
   const [checking, setChecking] = useState(true);
 
@@ -21,14 +22,12 @@ export default function Index() {
       return;
     }
 
-    // Verificación de email
     if (!session.user.email_confirmed_at) {
       setChecking(false);
       router.replace('/(auth)/verificar');
       return;
     }
 
-    // Onboarding (solo primera vez)
     const seen = await AsyncStorage.getItem('onboarding_seen');
     setChecking(false);
     if (!seen) {
@@ -39,7 +38,7 @@ export default function Index() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}>
       <ActivityIndicator color={COLORS.primary} size="large" />
     </View>
   );

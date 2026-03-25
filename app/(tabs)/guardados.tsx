@@ -6,9 +6,13 @@ import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
 import { PostCard } from '@/components/PostCard';
 import { Post } from '@/types';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function GuardadosScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { user } = useAuthStore();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,14 +76,14 @@ export default function GuardadosScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   loadingWrap: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.text, letterSpacing: -0.5, paddingHorizontal: 4, paddingBottom: 16 },
+  title: { fontSize: 26, fontWeight: '800', color: C.text, letterSpacing: -0.5, paddingHorizontal: 4, paddingBottom: 16 },
   grid: { paddingHorizontal: 12, paddingTop: 20, paddingBottom: 100 },
   row: { gap: 10, marginBottom: 10 },
   empty: { alignItems: 'center', paddingTop: 60 },
   emptyIcon: { fontSize: 44, marginBottom: 12 },
-  emptyText: { fontSize: 17, fontWeight: '600', color: COLORS.text, marginBottom: 6 },
-  emptySubtext: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', paddingHorizontal: 32 },
+  emptyText: { fontSize: 17, fontWeight: '600', color: C.text, marginBottom: 6 },
+  emptySubtext: { fontSize: 14, color: C.textMuted, textAlign: 'center', paddingHorizontal: 32 },
 });

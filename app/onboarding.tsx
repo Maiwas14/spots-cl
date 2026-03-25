@@ -6,7 +6,8 @@ import { useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +30,9 @@ const SLIDES = [
 ];
 
 export default function OnboardingScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const flatRef = useRef<FlatList>(null);
 
@@ -67,14 +71,12 @@ export default function OnboardingScreen() {
         )}
       />
 
-      {/* Dots */}
       <View style={styles.dots}>
         {SLIDES.map((_, i) => (
           <View key={i} style={[styles.dot, i === activeIndex && styles.dotActive]} />
         ))}
       </View>
 
-      {/* Buttons */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.btn} onPress={handleNext}>
           <Text style={styles.btnText}>
@@ -91,8 +93,8 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   slide: {
     width,
     flex: 1,
@@ -101,24 +103,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emoji: { fontSize: 80, marginBottom: 32 },
-  title: {
-    fontSize: 30, fontWeight: '800', color: COLORS.text,
-    textAlign: 'center', letterSpacing: -0.5, marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 16, color: COLORS.textMuted,
-    textAlign: 'center', lineHeight: 24,
-  },
+  title: { fontSize: 30, fontWeight: '800', color: C.text, textAlign: 'center', letterSpacing: -0.5, marginBottom: 16 },
+  subtitle: { fontSize: 16, color: C.textMuted, textAlign: 'center', lineHeight: 24 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginBottom: 24 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.border },
-  dotActive: { width: 20, backgroundColor: COLORS.primary },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: C.border },
+  dotActive: { width: 20, backgroundColor: C.primary },
   footer: { paddingHorizontal: 28, paddingBottom: 12, gap: 12 },
-  btn: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 14, paddingVertical: 16,
-    alignItems: 'center',
-  },
+  btn: { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   skipBtn: { alignItems: 'center', paddingVertical: 8 },
-  skipText: { fontSize: 14, color: COLORS.textMuted },
+  skipText: { fontSize: 14, color: C.textMuted },
 });

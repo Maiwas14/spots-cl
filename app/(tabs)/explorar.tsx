@@ -6,7 +6,8 @@ import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useRegiones } from '@/hooks/useRegiones';
 import { Post } from '@/types';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
@@ -23,6 +24,9 @@ if (!isExpoGo) {
 const CHILE_CENTER = { latitude: -35.6751, longitude: -71.543 };
 
 export default function ExplorarScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<number | null>(null);
   const [view, setView] = useState<'map' | 'list'>('map');
@@ -138,35 +142,35 @@ export default function ExplorarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
-  title: { fontSize: 26, fontWeight: '800', color: COLORS.text, letterSpacing: -1 },
-  viewToggle: { flexDirection: 'row', backgroundColor: COLORS.surface, borderRadius: 10, padding: 2 },
+  title: { fontSize: 26, fontWeight: '800', color: C.text, letterSpacing: -1 },
+  viewToggle: { flexDirection: 'row', backgroundColor: C.surface, borderRadius: 10, padding: 2 },
   toggleBtn: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 8 },
-  toggleActive: { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
-  toggleText: { fontSize: 13, color: COLORS.textMuted },
-  toggleTextActive: { color: COLORS.text, fontWeight: '600' },
+  toggleActive: { backgroundColor: C.background, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+  toggleText: { fontSize: 13, color: C.textMuted },
+  toggleTextActive: { color: C.text, fontWeight: '600' },
   filterScroll: { flexGrow: 0 },
   regionRow: { paddingHorizontal: 12, paddingBottom: 10, gap: 8 },
-  chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: COLORS.surface },
-  chipActive: { backgroundColor: COLORS.primary },
-  chipText: { fontSize: 13, color: COLORS.textMuted, fontWeight: '500' },
+  chip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: C.surface },
+  chipActive: { backgroundColor: C.primary },
+  chipText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
   map: { flex: 1 },
-  mapFallback: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#eef2ee', paddingHorizontal: 32 },
+  mapFallback: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: C.surface, paddingHorizontal: 32 },
   mapFallbackIcon: { fontSize: 56, marginBottom: 16 },
-  mapFallbackTitle: { fontSize: 18, fontWeight: '700', color: COLORS.text, textAlign: 'center', marginBottom: 8 },
-  mapFallbackSub: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', lineHeight: 20 },
+  mapFallbackTitle: { fontSize: 18, fontWeight: '700', color: C.text, textAlign: 'center', marginBottom: 8 },
+  mapFallbackSub: { fontSize: 14, color: C.textMuted, textAlign: 'center', lineHeight: 20 },
   markerContainer: { alignItems: 'center' },
   markerEmoji: { fontSize: 28 },
   callout: { width: 160, padding: 8 },
-  calloutTitle: { fontSize: 13, fontWeight: '600', color: COLORS.text },
-  calloutSub: { fontSize: 11, color: COLORS.primary, marginTop: 4 },
+  calloutTitle: { fontSize: 13, fontWeight: '600', color: '#111' },
+  calloutSub: { fontSize: 11, color: C.primary, marginTop: 4 },
   list: { padding: 16, gap: 12 },
-  listItem: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 16 },
-  listTitle: { fontSize: 15, fontWeight: '600', color: COLORS.text },
-  listSub: { fontSize: 13, color: COLORS.textMuted, marginTop: 4 },
+  listItem: { backgroundColor: C.surface, borderRadius: 12, padding: 16 },
+  listTitle: { fontSize: 15, fontWeight: '600', color: C.text },
+  listSub: { fontSize: 13, color: C.textMuted, marginTop: 4 },
   emptyList: { alignItems: 'center', paddingTop: 60 },
-  emptyListText: { fontSize: 15, color: COLORS.textMuted },
+  emptyListText: { fontSize: 15, color: C.textMuted },
 });

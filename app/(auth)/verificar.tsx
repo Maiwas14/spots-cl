@@ -4,9 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function VerificarScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { user, signOut } = useAuthStore();
   const [resending, setResending] = useState(false);
   const [checking, setChecking] = useState(false);
@@ -71,25 +75,25 @@ export default function VerificarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   inner: { flex: 1, paddingHorizontal: 28, justifyContent: 'center', alignItems: 'center' },
   emoji: { fontSize: 72, marginBottom: 24 },
-  title: { fontSize: 28, fontWeight: '800', color: COLORS.text, letterSpacing: -0.5, marginBottom: 12, textAlign: 'center' },
-  subtitle: { fontSize: 15, color: COLORS.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: 8 },
-  email: { color: COLORS.text, fontWeight: '600' },
-  hint: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 40 },
+  title: { fontSize: 28, fontWeight: '800', color: C.text, letterSpacing: -0.5, marginBottom: 12, textAlign: 'center' },
+  subtitle: { fontSize: 15, color: C.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: 8 },
+  email: { color: C.text, fontWeight: '600' },
+  hint: { fontSize: 14, color: C.textMuted, textAlign: 'center', lineHeight: 20, marginBottom: 40 },
   primaryBtn: {
-    backgroundColor: COLORS.primary, borderRadius: 14,
+    backgroundColor: C.primary, borderRadius: 14,
     paddingVertical: 15, paddingHorizontal: 32,
     alignItems: 'center', width: '100%', marginBottom: 12,
   },
   primaryBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   secondaryBtn: {
     borderRadius: 14, paddingVertical: 15, paddingHorizontal: 32,
-    alignItems: 'center', width: '100%', backgroundColor: COLORS.surface,
+    alignItems: 'center', width: '100%', backgroundColor: C.surface,
   },
-  secondaryBtnText: { color: COLORS.primary, fontSize: 15, fontWeight: '600' },
+  secondaryBtnText: { color: C.primary, fontSize: 15, fontWeight: '600' },
   logoutBtn: { marginTop: 24 },
-  logoutText: { fontSize: 14, color: COLORS.textMuted },
+  logoutText: { fontSize: 14, color: C.textMuted },
 });

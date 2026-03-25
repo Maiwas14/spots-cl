@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet, Dimensions } from 'react-native';
+import { View, Animated, StyleSheet, Dimensions, useColorScheme } from 'react-native';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 36) / 2;
 
 export function SkeletonCard({ height = 200 }: { height?: number }) {
+  const scheme = useColorScheme();
+  const bgColor = scheme === 'dark' ? '#2a2a2a' : '#e8e8e8';
   const opacity = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export function SkeletonCard({ height = 200 }: { height?: number }) {
   }, []);
 
   return (
-    <Animated.View style={[styles.card, { width: CARD_WIDTH, height, opacity }]} />
+    <Animated.View style={[styles.card, { width: CARD_WIDTH, height, opacity, backgroundColor: bgColor }]} />
   );
 }
 
@@ -43,5 +45,5 @@ export function SkeletonGrid() {
 const styles = StyleSheet.create({
   grid: { paddingHorizontal: 12, paddingTop: 10 },
   row: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-  card: { borderRadius: 14, backgroundColor: '#e8e8e8' },
+  card: { borderRadius: 14 },
 });

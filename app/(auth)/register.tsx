@@ -15,9 +15,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function Register() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -54,25 +58,22 @@ export default function Register() {
       <KeyboardAvoidingView style={styles.kav} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
-          {/* Back */}
           <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={22} color={COLORS.text} />
           </TouchableOpacity>
 
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>Crear cuenta</Text>
             <Text style={styles.subtitle}>Empieza a compartir spots de Chile</Text>
           </View>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputWrap}>
               <Text style={styles.label}>Usuario *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="@tunombre"
-                placeholderTextColor="#ccc"
+                placeholderTextColor={COLORS.border}
                 value={username}
                 onChangeText={setUsername}
                 autoCapitalize="none"
@@ -84,7 +85,7 @@ export default function Register() {
               <TextInput
                 style={styles.input}
                 placeholder="Tu nombre"
-                placeholderTextColor="#ccc"
+                placeholderTextColor={COLORS.border}
                 value={fullName}
                 onChangeText={setFullName}
               />
@@ -95,7 +96,7 @@ export default function Register() {
               <TextInput
                 style={styles.input}
                 placeholder="tu@correo.com"
-                placeholderTextColor="#ccc"
+                placeholderTextColor={COLORS.border}
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
@@ -108,7 +109,7 @@ export default function Register() {
               <TextInput
                 style={styles.input}
                 placeholder="Mínimo 6 caracteres"
-                placeholderTextColor="#ccc"
+                placeholderTextColor={COLORS.border}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -137,33 +138,27 @@ export default function Register() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   kav: { flex: 1 },
   inner: { flexGrow: 1, paddingHorizontal: 28, paddingBottom: 40 },
   backBtn: { paddingTop: 8, paddingBottom: 24, alignSelf: 'flex-start' },
   header: { marginBottom: 40 },
-  title: { fontSize: 36, fontWeight: '800', color: COLORS.text, letterSpacing: -1, marginBottom: 6 },
-  subtitle: { fontSize: 15, color: COLORS.textMuted },
+  title: { fontSize: 36, fontWeight: '800', color: C.text, letterSpacing: -1, marginBottom: 6 },
+  subtitle: { fontSize: 15, color: C.textMuted },
   form: { gap: 24 },
   inputWrap: { gap: 6 },
-  label: { fontSize: 12, fontWeight: '600', color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  label: { fontSize: 12, fontWeight: '600', color: C.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
   input: {
     fontSize: 17,
-    color: COLORS.text,
+    color: C.text,
     paddingVertical: 10,
     borderBottomWidth: 1.5,
-    borderBottomColor: COLORS.border,
+    borderBottomColor: C.border,
   },
-  btn: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: 12,
-  },
+  btn: { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 12 },
   btnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 32 },
-  footerText: { fontSize: 14, color: COLORS.textMuted },
-  footerLink: { fontSize: 14, color: COLORS.primary, fontWeight: '700' },
+  footerText: { fontSize: 14, color: C.textMuted },
+  footerLink: { fontSize: 14, color: C.primary, fontWeight: '700' },
 });

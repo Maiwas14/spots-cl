@@ -9,13 +9,17 @@ import { es } from 'date-fns/locale';
 import { useComments } from '@/hooks/useComments';
 import { useAuthStore } from '@/stores/authStore';
 import { Avatar } from '@/components/Avatar';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 interface Props {
   postId: string;
 }
 
 export function CommentsSection({ postId }: Props) {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { comments, loading, addComment, deleteComment } = useComments(postId);
   const { user, profile } = useAuthStore();
   const [texto, setTexto] = useState('');
@@ -68,7 +72,6 @@ export function CommentsSection({ postId }: Props) {
         ))
       )}
 
-      {/* Input */}
       {user && (
         <View style={styles.inputRow}>
           <Avatar uri={profile?.avatar_url} username={profile?.username} size={32} />
@@ -94,24 +97,24 @@ export function CommentsSection({ postId }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (C: Colors) => StyleSheet.create({
   container: { marginTop: 8 },
-  title: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 16 },
-  count: { color: COLORS.textMuted, fontWeight: '400' },
-  empty: { fontSize: 14, color: COLORS.textMuted, marginBottom: 16 },
+  title: { fontSize: 16, fontWeight: '700', color: C.text, marginBottom: 16 },
+  count: { color: C.textMuted, fontWeight: '400' },
+  empty: { fontSize: 14, color: C.textMuted, marginBottom: 16 },
   comment: { flexDirection: 'row', gap: 10, marginBottom: 16, alignItems: 'flex-start' },
   commentBody: { flex: 1 },
   commentHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
-  username: { fontSize: 13, fontWeight: '700', color: COLORS.text },
-  time: { fontSize: 11, color: COLORS.textMuted },
-  texto: { fontSize: 14, color: COLORS.text, lineHeight: 20 },
+  username: { fontSize: 13, fontWeight: '700', color: C.text },
+  time: { fontSize: 11, color: C.textMuted },
+  texto: { fontSize: 14, color: C.text, lineHeight: 20 },
   inputRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: 16, marginTop: 4,
+    borderTopWidth: 1, borderTopColor: C.border, paddingTop: 16, marginTop: 4,
   },
   input: {
-    flex: 1, fontSize: 14, color: COLORS.text,
-    backgroundColor: COLORS.surface, borderRadius: 20,
+    flex: 1, fontSize: 14, color: C.text,
+    backgroundColor: C.surface, borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 8, maxHeight: 80,
   },
   sendBtn: { padding: 4 },

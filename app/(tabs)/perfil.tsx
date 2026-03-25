@@ -14,9 +14,13 @@ import { useAuthStore } from '@/stores/authStore';
 import { useProfile } from '@/hooks/useProfile';
 import { PostCard } from '@/components/PostCard';
 import { Avatar } from '@/components/Avatar';
-import { COLORS } from '@/constants';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 export default function PerfilScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { user, profile: authProfile, signOut } = useAuthStore();
   const { profile, posts, loading, refetch } = useProfile(user?.id ?? '');
 
@@ -45,7 +49,6 @@ export default function PerfilScreen() {
         )}
         ListHeaderComponent={
           <View style={styles.header}>
-            {/* Avatar */}
             <TouchableOpacity onPress={() => router.push('/editar-perfil')} style={{ marginBottom: 12 }}>
               <Avatar uri={displayProfile?.avatar_url} username={displayProfile?.username} size={84} />
             </TouchableOpacity>
@@ -58,7 +61,6 @@ export default function PerfilScreen() {
               <Text style={styles.bio}>{displayProfile.bio}</Text>
             ) : null}
 
-            {/* Stats */}
             <View style={styles.stats}>
               <View style={styles.statItem}>
                 <Text style={styles.statNumber}>{posts.length}</Text>
@@ -71,7 +73,6 @@ export default function PerfilScreen() {
               </View>
             </View>
 
-            {/* Actions */}
             <View style={styles.actions}>
               <TouchableOpacity style={styles.editBtn} onPress={() => router.push('/editar-perfil')}>
                 <Text style={styles.editBtnText}>Editar perfil</Text>
@@ -102,34 +103,28 @@ export default function PerfilScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   header: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 8, alignItems: 'center' },
-  username: { fontSize: 16, fontWeight: '700', color: COLORS.text, marginBottom: 2 },
-  fullName: { fontSize: 14, color: COLORS.textMuted },
-  bio: { fontSize: 14, color: COLORS.textMuted, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 6 },
+  username: { fontSize: 16, fontWeight: '700', color: C.text, marginBottom: 2 },
+  fullName: { fontSize: 14, color: C.textMuted },
+  bio: { fontSize: 14, color: C.textMuted, textAlign: 'center', paddingHorizontal: 32, lineHeight: 20, marginTop: 6 },
   stats: { flexDirection: 'row', marginTop: 20, marginBottom: 20, alignItems: 'center' },
   statItem: { alignItems: 'center', paddingHorizontal: 32 },
-  statNumber: { fontSize: 22, fontWeight: '800', color: COLORS.text },
-  statLabel: { fontSize: 12, color: COLORS.textMuted, marginTop: 1 },
-  statDivider: { width: 1, height: 28, backgroundColor: COLORS.border },
+  statNumber: { fontSize: 22, fontWeight: '800', color: C.text },
+  statLabel: { fontSize: 12, color: C.textMuted, marginTop: 1 },
+  statDivider: { width: 1, height: 28, backgroundColor: C.border },
   actions: { flexDirection: 'row', gap: 10, marginBottom: 24, width: '100%' },
-  editBtn: {
-    flex: 1, paddingVertical: 10, borderRadius: 10,
-    backgroundColor: COLORS.surface, alignItems: 'center',
-  },
-  editBtnText: { color: COLORS.text, fontSize: 14, fontWeight: '600' },
-  signOutBtn: {
-    paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10,
-    backgroundColor: COLORS.surface,
-  },
-  signOutText: { color: COLORS.textMuted, fontSize: 14, fontWeight: '500' },
-  sectionTitle: { fontSize: 15, fontWeight: '700', color: COLORS.text, alignSelf: 'flex-start', marginBottom: 12 },
+  editBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: C.surface, alignItems: 'center' },
+  editBtnText: { color: C.text, fontSize: 14, fontWeight: '600' },
+  signOutBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10, backgroundColor: C.surface },
+  signOutText: { color: C.textMuted, fontSize: 14, fontWeight: '500' },
+  sectionTitle: { fontSize: 15, fontWeight: '700', color: C.text, alignSelf: 'flex-start', marginBottom: 12 },
   grid: { paddingHorizontal: 12, paddingBottom: 100 },
   row: { gap: 10, marginBottom: 10 },
   empty: { alignItems: 'center', paddingTop: 32 },
   emptyIcon: { fontSize: 40, marginBottom: 10 },
-  emptyText: { fontSize: 15, color: COLORS.textMuted, marginBottom: 16 },
-  uploadCta: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, backgroundColor: COLORS.text },
+  emptyText: { fontSize: 15, color: C.textMuted, marginBottom: 16 },
+  uploadCta: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 10, backgroundColor: C.primary },
   uploadCtaText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 });

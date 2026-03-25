@@ -23,17 +23,21 @@ import { usePostsStore } from '@/stores/postsStore';
 import { useRegiones } from '@/hooks/useRegiones';
 import { useComunas } from '@/hooks/useComunas';
 import { useUploadImage } from '@/hooks/useUploadImage';
-import { COLORS, CATEGORIAS } from '@/constants';
+import { useColors, CATEGORIAS } from '@/constants';
+import type { Colors } from '@/constants';
 import { CategoriaTipo } from '@/types';
 
 const { width } = Dimensions.get('window');
 const THUMB = (width - 32 - 16) / 3;
 
 export default function SubirScreen() {
+  const COLORS = useColors();
+  const styles = getStyles(COLORS);
+
   const { user } = useAuthStore();
   const fetchPosts = usePostsStore((s) => s.fetchPosts);
   const { regiones } = useRegiones();
-  const { pickImage, pickMultipleImages, takePhoto, uploadImage, uploadMultipleImages, uploading } = useUploadImage();
+  const { pickMultipleImages, takePhoto, uploadImage, uploadMultipleImages, uploading } = useUploadImage();
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -95,7 +99,6 @@ export default function SubirScreen() {
 
     setSaving(true);
 
-    // Sube la primera imagen como imagen principal
     const mainUrl = await uploadImage(imageUris[0]);
     if (!mainUrl) {
       Alert.alert('Error', 'No se pudo subir la imagen');
@@ -121,7 +124,6 @@ export default function SubirScreen() {
       return;
     }
 
-    // Sube imágenes adicionales
     if (imageUris.length > 1) {
       const extraUrls = await uploadMultipleImages(imageUris.slice(1));
       if (extraUrls.length > 0) {
@@ -131,7 +133,6 @@ export default function SubirScreen() {
       }
     }
 
-    // Registra la imagen principal también en post_images (orden 0)
     await supabase.from('post_images').insert({ post_id: post.id, url: mainUrl, orden: 0 });
 
     setSaving(false);
@@ -148,7 +149,6 @@ export default function SubirScreen() {
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>Nuevo spot</Text>
 
-        {/* Image picker */}
         {imageUris.length === 0 ? (
           <TouchableOpacity style={styles.imagePlaceholder} onPress={handlePickImages}>
             <Ionicons name="camera-outline" size={36} color={COLORS.textMuted} />
@@ -177,7 +177,6 @@ export default function SubirScreen() {
           </View>
         )}
 
-        {/* Title */}
         <Text style={styles.label}>Título *</Text>
         <TextInput
           style={styles.input}
@@ -188,7 +187,6 @@ export default function SubirScreen() {
           maxLength={80}
         />
 
-        {/* Description */}
         <Text style={styles.label}>Descripción</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -201,7 +199,6 @@ export default function SubirScreen() {
           maxLength={300}
         />
 
-        {/* Region */}
         <Text style={styles.label}>Región *</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.optionsScroll}>
           {regiones.map((r) => (
@@ -215,7 +212,6 @@ export default function SubirScreen() {
           ))}
         </ScrollView>
 
-        {/* Comuna */}
         {comunas.length > 0 && (
           <>
             <Text style={styles.label}>Comuna</Text>
@@ -233,7 +229,6 @@ export default function SubirScreen() {
           </>
         )}
 
-        {/* Category */}
         <Text style={styles.label}>Categoría</Text>
         <View style={styles.categoryGrid}>
           {CATEGORIAS.map((cat) => (
@@ -248,7 +243,6 @@ export default function SubirScreen() {
           ))}
         </View>
 
-        {/* Location */}
         <Text style={styles.label}>Ubicación GPS</Text>
         <TouchableOpacity style={styles.locationBtn} onPress={handleGetLocation} disabled={locLoading}>
           {locLoading ? (
@@ -260,7 +254,6 @@ export default function SubirScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Submit */}
         <TouchableOpacity
           style={[styles.submitBtn, (saving || uploading) && styles.submitDisabled]}
           onPress={handleSubmit}
@@ -277,20 +270,15 @@ export default function SubirScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
+const getStyles = (C: Colors) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: C.background },
   scroll: { padding: 16, paddingBottom: 110 },
-  title: { fontSize: 24, fontWeight: '800', color: COLORS.text, marginBottom: 20, letterSpacing: -0.5 },
+  title: { fontSize: 24, fontWeight: '800', color: C.text, marginBottom: 20, letterSpacing: -0.5 },
   imagePlaceholder: {
-    height: 180,
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    gap: 8,
+    height: 180, backgroundColor: C.surface, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 20, gap: 8,
   },
-  imagePlaceholderText: { color: COLORS.textMuted, fontSize: 14, fontWeight: '500' },
+  imagePlaceholderText: { color: C.textMuted, fontSize: 14, fontWeight: '500' },
   thumbGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   thumbWrap: { width: THUMB, height: THUMB, borderRadius: 10, overflow: 'hidden', position: 'relative' },
   thumb: { width: '100%', height: '100%' },
@@ -300,27 +288,24 @@ const styles = StyleSheet.create({
   },
   mainBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   removeBtn: { position: 'absolute', top: 4, right: 4 },
-  addMoreBtn: {
-    width: THUMB, height: THUMB, borderRadius: 10,
-    backgroundColor: COLORS.surface, alignItems: 'center', justifyContent: 'center',
-  },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.textMuted, marginBottom: 8, marginTop: 18, textTransform: 'uppercase', letterSpacing: 0.4 },
-  input: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, fontSize: 15, color: COLORS.text },
+  addMoreBtn: { width: THUMB, height: THUMB, borderRadius: 10, backgroundColor: C.surface, alignItems: 'center', justifyContent: 'center' },
+  label: { fontSize: 13, fontWeight: '600', color: C.textMuted, marginBottom: 8, marginTop: 18, textTransform: 'uppercase', letterSpacing: 0.4 },
+  input: { backgroundColor: C.surface, borderRadius: 12, padding: 14, fontSize: 15, color: C.text },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
   optionsScroll: { marginBottom: 4 },
   chip: {
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: COLORS.surface, marginRight: 8,
+    backgroundColor: C.surface, marginRight: 8,
     flexDirection: 'row', alignItems: 'center', gap: 4,
   },
-  chipActive: { backgroundColor: COLORS.primary },
-  chipText: { fontSize: 13, color: COLORS.textMuted, fontWeight: '500' },
+  chipActive: { backgroundColor: C.primary },
+  chipText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
   chipTextActive: { color: '#fff', fontWeight: '600' },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catEmoji: { fontSize: 14 },
-  locationBtn: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, alignItems: 'center' },
-  locationBtnText: { color: COLORS.primary, fontWeight: '500', fontSize: 14 },
-  submitBtn: { backgroundColor: COLORS.primary, borderRadius: 14, padding: 17, alignItems: 'center', marginTop: 28 },
+  locationBtn: { backgroundColor: C.surface, borderRadius: 12, padding: 14, alignItems: 'center' },
+  locationBtnText: { color: C.primary, fontWeight: '500', fontSize: 14 },
+  submitBtn: { backgroundColor: C.primary, borderRadius: 14, padding: 17, alignItems: 'center', marginTop: 28 },
   submitDisabled: { opacity: 0.5 },
   submitText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
