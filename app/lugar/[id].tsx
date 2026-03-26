@@ -245,9 +245,14 @@ export default function LugarScreen() {
           )}
 
           {post.user_id === user?.id && (
-            <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
-              <Text style={styles.deleteBtnText}>Eliminar lugar</Text>
-            </TouchableOpacity>
+            <View style={styles.ownerActions}>
+              <TouchableOpacity style={styles.editBtn} onPress={() => router.push(`/editar-lugar/${post.id}`)}>
+                <Text style={styles.editBtnText}>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
+                <Text style={styles.deleteBtnText}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
           )}
 
           <CommentsSection postId={post.id} />
@@ -311,6 +316,9 @@ const getStyles = (C: Colors) => StyleSheet.create({
   authorAvatarInitial: { color: C.text, fontSize: 17, fontWeight: '700' },
   authorLabel: { fontSize: 11, color: C.textMuted },
   authorUsername: { fontSize: 14, fontWeight: '600', color: C.text },
-  deleteBtn: { alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: '#fff5f5' },
+  ownerActions: { flexDirection: 'row', gap: 10, marginBottom: 8 },
+  editBtn: { flex: 1, alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: C.surface },
+  editBtnText: { color: C.text, fontSize: 14, fontWeight: '500' },
+  deleteBtn: { flex: 1, alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: '#fff5f5' },
   deleteBtnText: { color: '#ef4444', fontSize: 14, fontWeight: '500' },
 });

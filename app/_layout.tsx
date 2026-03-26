@@ -8,8 +8,12 @@ export default function RootLayout() {
   const setSession = useAuthStore((s) => s.setSession);
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (event === 'PASSWORD_RECOVERY') {
+        router.replace('/(auth)/nueva-contrasena');
+        return;
+      }
       if (!session) {
         router.replace('/(auth)/login');
       }
@@ -27,7 +31,8 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="lugar/[id]" options={{ presentation: 'card' }} />
         <Stack.Screen name="perfil/[id]" options={{ presentation: 'card' }} />
-        <Stack.Screen name="editar-perfil" options={{ presentation: 'modal', headerShown: false }} />
+        <Stack.Screen name="editar-perfil" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="editar-lugar/[id]" options={{ presentation: 'modal' }} />
       </Stack>
     </>
   );

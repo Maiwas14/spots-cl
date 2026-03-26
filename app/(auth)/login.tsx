@@ -84,6 +84,10 @@ export default function Login() {
                 <Text style={styles.btnText}>Ingresar</Text>
               )}
             </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => router.push('/(auth)/recuperar')} style={styles.forgotBtn}>
+              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
@@ -117,6 +121,8 @@ const getStyles = (C: Colors) => StyleSheet.create({
   },
   btn: { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 12 },
   btnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  forgotBtn: { alignItems: 'center', marginTop: 16 },
+  forgotText: { fontSize: 14, color: C.textMuted },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 36 },
   footerText: { fontSize: 14, color: C.textMuted },
   footerLink: { fontSize: 14, color: C.primary, fontWeight: '700' },
