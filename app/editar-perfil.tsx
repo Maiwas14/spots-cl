@@ -27,6 +27,7 @@ export default function EditarPerfilScreen() {
 
   const { user, profile, setProfile } = useAuthStore();
   const { uploadAvatar } = useUploadImage();
+  const [username, setUsername] = useState(profile?.username ?? '');
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [bio, setBio] = useState(profile?.bio ?? '');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -73,6 +74,10 @@ export default function EditarPerfilScreen() {
 
   const handleSave = async () => {
     if (!user) return;
+    if (!username.trim()) {
+      Alert.alert('Error', 'El nombre de usuario no puede estar vacío');
+      return;
+    }
     setSaving(true);
 
     let avatarUrl = profile?.avatar_url ?? null;
@@ -82,6 +87,7 @@ export default function EditarPerfilScreen() {
     }
 
     const updates = {
+      username: username.trim().toLowerCase(),
       full_name: fullName.trim(),
       bio: bio.trim(),
       avatar_url: avatarUrl,
@@ -140,10 +146,15 @@ export default function EditarPerfilScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Usuario</Text>
-          <View style={styles.inputDisabled}>
-            <Text style={styles.inputDisabledText}>@{profile?.username}</Text>
-          </View>
-          <Text style={styles.hint}>El nombre de usuario no se puede cambiar</Text>
+          <TextInput
+            style={styles.input}
+            value={username}
+            onChangeText={setUsername}
+            placeholder="tunombre"
+            placeholderTextColor={COLORS.textMuted}
+            autoCapitalize="none"
+            maxLength={30}
+          />
         </View>
 
         <View style={styles.section}>
