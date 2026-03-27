@@ -41,7 +41,10 @@ export default function Register() {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { username, full_name: fullName } },
+      options: {
+        data: { username, full_name: fullName },
+        emailRedirectTo: 'spots://login',
+      },
     });
     setLoading(false);
     if (error) {
