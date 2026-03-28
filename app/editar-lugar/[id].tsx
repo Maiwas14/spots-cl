@@ -10,6 +10,7 @@ import { usePost } from '@/hooks/usePost';
 import { useRegiones } from '@/hooks/useRegiones';
 import { useComunas } from '@/hooks/useComunas';
 import { usePostsStore } from '@/stores/postsStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useColors, CATEGORIAS, DIFICULTADES } from '@/constants';
 import type { Colors } from '@/constants';
 import { CategoriaTipo } from '@/types';
@@ -23,6 +24,7 @@ export default function EditarLugarScreen() {
   const { post, loading } = usePost(id);
   const { regiones } = useRegiones();
   const fetchPosts = usePostsStore((s) => s.fetchPosts);
+  const { user } = useAuthStore();
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -37,6 +39,12 @@ export default function EditarLugarScreen() {
 
   useEffect(() => {
     if (post && !initialized) {
+      if (post.user_id !== user?.id) {
+        Alert.alert('Sin permiso', 'No tienes permiso para editar este spot', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+        return;
+      }
       setTitulo(post.titulo);
       setDescripcion(post.descripcion ?? '');
       setCategoria(post.categoria);

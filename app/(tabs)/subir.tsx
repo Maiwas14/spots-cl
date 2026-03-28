@@ -70,7 +70,11 @@ export default function SubirScreen() {
         }
       );
     } else {
-      pickMultipleImages().then((uris) => uris.length > 0 && setImageUris(uris));
+      Alert.alert('Agregar fotos', 'Elige una opción', [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Galería', onPress: () => pickMultipleImages().then((uris) => uris.length > 0 && setImageUris(uris)) },
+        { text: 'Tomar foto', onPress: async () => { const uri = await takePhoto(); if (uri) setImageUris((prev) => [...prev, uri].slice(0, 5)); } },
+      ]);
     }
   };
 

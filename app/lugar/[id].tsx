@@ -30,6 +30,7 @@ if (!isExpoGo) {
 
 import { usePost } from '@/hooks/usePost';
 import { useAuthStore } from '@/stores/authStore';
+import { usePostsStore } from '@/stores/postsStore';
 import { supabase } from '@/lib/supabase';
 import { useColors, CATEGORIAS } from '@/constants';
 import type { Colors } from '@/constants';
@@ -53,6 +54,7 @@ export default function LugarScreen() {
   const { post, loading, setPost } = usePost(id);
   const { rate } = useRating(id);
   const { user } = useAuthStore();
+  const updatePostInStore = usePostsStore((s) => s.updatePostInStore);
   const [extraImages, setExtraImages] = useState<string[]>([]);
   const [zoomUri, setZoomUri] = useState<string | null>(null);
   const [ratingSuccess, setRatingSuccess] = useState(false);
@@ -79,10 +81,16 @@ export default function LugarScreen() {
     if (!user || !post) return;
     const saved = post.user_saved;
     setPost({ ...post, user_saved: !saved });
+    updatePostInStore(post.id, { user_saved: !saved });
+    let error;
     if (saved) {
-      await supabase.from('guardados').delete().eq('post_id', post.id).eq('user_id', user.id);
+      ({ error } = await supabase.from('guardados').delete().eq('post_id', post.id).eq('user_id', user.id));
     } else {
-      await supabase.from('guardados').insert({ post_id: post.id, user_id: user.id });
+      ({ error } = await supabase.from('guardados').insert({ post_id: post.id, user_id: user.id }));
+    }
+    if (error) {
+      setPost({ ...post, user_saved: saved });
+      updatePostInStore(post.id, { user_saved: saved });
     }
   };
 
@@ -116,6 +124,20 @@ export default function LugarScreen() {
       {
         text: 'Eliminar', style: 'destructive',
         onPress: async () => {
+          // Clean up images from storage
+          const { data: images } = await supabase
+            .from('post_images')
+            .select('url')
+            .eq('post_id', post.id);
+          if (images && images.length > 0) {
+            const paths = images.map((img) => {
+              const parts = img.url.split('/lugares/');
+              return parts[1]?.split('?')[0];
+            }).filter(Boolean) as string[];
+            if (paths.length > 0) {
+              await supabase.storage.from('lugares').remove(paths);
+            }
+          }
           await supabase.from('posts').delete().eq('id', post.id);
           router.back();
         },
@@ -254,7 +276,7 @@ export default function LugarScreen() {
                 <Image source={{ uri: post.profiles.avatar_url }} style={styles.authorAvatarImg} contentFit="cover" />
               ) : (
                 <View style={styles.authorAvatarPlaceholder}>
-                  <Text style={styles.authorAvatarInitial}>{post.profiles.username[0].toUpperCase()}</Text>
+                  <Text style={styles.authorAvatarInitial}>{(post.profiles.username || 'U')[0].toUpperCase()}</Text>
                 </View>
               )}
               <View style={{ flex: 1 }}>
@@ -315,7 +337,7 @@ const getStyles = (C: Colors) => StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 12, borderRadius: 12, backgroundColor: C.surface,
   },
-  actionBtnSaved: { backgroundColor: '#f0f5f2' },
+  actionBtnSaved: { backgroundColor: C.scheme === 'dark' ? 'rgba(61,139,94,0.15)' : '#f0f5f2' },
   actionBtnText: { fontSize: 14, color: C.textMuted, fontWeight: '500' },
   actionBtnTextSaved: { color: C.primary },
   navigateBtn: {
@@ -341,6 +363,6 @@ const getStyles = (C: Colors) => StyleSheet.create({
   ownerActions: { flexDirection: 'row', gap: 10, marginBottom: 8 },
   editBtn: { flex: 1, alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: C.surface },
   editBtnText: { color: C.text, fontSize: 14, fontWeight: '500' },
-  deleteBtn: { flex: 1, alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: '#fff5f5' },
+  deleteBtn: { flex: 1, alignItems: 'center', padding: 14, borderRadius: 12, backgroundColor: C.scheme === 'dark' ? 'rgba(239,68,68,0.12)' : '#fff5f5' },
   deleteBtnText: { color: '#ef4444', fontSize: 14, fontWeight: '500' },
 });

@@ -42,6 +42,9 @@ export default function NuevaContrasenaScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <KeyboardAvoidingView style={styles.kav} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.inner}>
+          <TouchableOpacity style={styles.cancelBtn} onPress={() => router.replace('/(auth)/login')}>
+            <Text style={styles.cancelText}>Cancelar</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>Nueva contraseña</Text>
           <Text style={styles.subtitle}>Elige una contraseña segura para tu cuenta.</Text>
 
@@ -102,4 +105,6 @@ const getStyles = (C: Colors) => StyleSheet.create({
   },
   btn: { backgroundColor: C.primary, borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 12 },
   btnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+  cancelBtn: { alignSelf: 'flex-start', marginBottom: 24 },
+  cancelText: { fontSize: 16, color: C.textMuted },
 });

@@ -26,11 +26,11 @@ const DARK = {
   success: '#22c55e',
 };
 
-export type Colors = typeof LIGHT;
+export type Colors = typeof LIGHT & { scheme: 'light' | 'dark' };
 
 export function useColors(): Colors {
-  const scheme = useColorScheme();
-  return scheme === 'dark' ? DARK : LIGHT;
+  const scheme = useColorScheme() ?? 'light';
+  return { ...(scheme === 'dark' ? DARK : LIGHT), scheme };
 }
 
 export const CATEGORIAS: { value: string; label: string; emoji: string }[] = [

@@ -20,7 +20,8 @@ export function useProfile(userId: string) {
         .from('posts')
         .select('*, regiones(id, nombre)')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(50),
     ]);
     if (profileRes.data) setProfile(profileRes.data);
     if (postsRes.data) setPosts(postsRes.data);

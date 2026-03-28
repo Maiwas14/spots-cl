@@ -27,7 +27,7 @@ export default function FeedScreen() {
   const {
     posts, loading, hasMore,
     regionFilter, comunaFilter, categoriaFilter, dificultadFilter, searchQuery, sortBy,
-    fetchPosts, setRegionFilter, setComunaFilter, setCategoriaFilter, setDificultadFilter, setSearchQuery, setSortBy,
+    fetchPosts, setMultipleFilters, setSearchQuery, setSortBy,
   } = usePostsStore();
   const { regiones } = useRegiones();
   const { comunas } = useComunas(regionFilter);
@@ -64,19 +64,12 @@ export default function FeedScreen() {
 
   const applyFilters = () => {
     setFilterModalVisible(false);
-    // Apply changes only for filters that actually changed
-    if (tempRegion !== regionFilter) {
-      setRegionFilter(tempRegion);
-    }
-    if (tempComuna !== comunaFilter) {
-      setComunaFilter(tempComuna);
-    }
-    if (tempCategoria !== categoriaFilter) {
-      setCategoriaFilter(tempCategoria);
-    }
-    if (tempDificultad !== dificultadFilter) {
-      setDificultadFilter(tempDificultad);
-    }
+    setMultipleFilters({
+      regionFilter: tempRegion,
+      comunaFilter: tempComuna,
+      categoriaFilter: tempCategoria,
+      dificultadFilter: tempDificultad,
+    });
   };
 
   const clearAllFilters = () => {

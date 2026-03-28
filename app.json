@@ -18,7 +18,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos tu ubicación para marcar dónde tomaste la foto.",
         "NSPhotoLibraryUsageDescription": "Necesitamos acceso a tus fotos para subirlas.",
-        "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para tomar fotos de lugares."
+        "NSCameraUsageDescription": "Necesitamos acceso a tu cámara para tomar fotos de lugares.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -40,7 +41,6 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.CAMERA",
         "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.RECORD_AUDIO"
       ]
     },

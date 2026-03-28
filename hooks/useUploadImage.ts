@@ -101,8 +101,16 @@ export function useUploadImage() {
         [{ resize: { width: 400 } }],
         { compress: 0.85, format: ImageManipulator.SaveFormat.JPEG }
       );
-      const url = await compressAndUpload(manipulated.uri, `avatars/${user.id}.jpg`);
-      return url ? `${url}?t=${Date.now()}` : null;
+      const response = await fetch(manipulated.uri);
+      const blob = await response.blob();
+      const arrayBuffer = await new Response(blob).arrayBuffer();
+      const fileName = `avatars/${user.id}.jpg`;
+      const { error } = await supabase.storage
+        .from('lugares')
+        .upload(fileName, arrayBuffer, { contentType: 'image/jpeg', upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('lugares').getPublicUrl(fileName);
+      return `${data.publicUrl}?t=${Date.now()}`;
     } catch (e) {
       console.error('Error uploading avatar:', e);
       return null;

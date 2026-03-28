@@ -25,11 +25,12 @@ export default function GuardadosScreen() {
   );
 
   const fetchSaved = async () => {
+    if (!user?.id) return;
     setLoading(true);
     const { data: saved, error: savedError } = await supabase
       .from('guardados')
       .select('post_id')
-      .eq('user_id', user!.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
     if (savedError) {
