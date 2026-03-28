@@ -12,7 +12,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -23,16 +23,17 @@ import { usePostsStore } from '@/stores/postsStore';
 import { useRegiones } from '@/hooks/useRegiones';
 import { useComunas } from '@/hooks/useComunas';
 import { useUploadImage } from '@/hooks/useUploadImage';
-import { useColors, CATEGORIAS } from '@/constants';
+import { useColors, CATEGORIAS, DIFICULTADES } from '@/constants';
 import type { Colors } from '@/constants';
 import { CategoriaTipo } from '@/types';
+import { DifficultyBar } from '@/components/DifficultyBar';
 
 const { width } = Dimensions.get('window');
 const THUMB = (width - 32 - 16) / 3;
 
 export default function SubirScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { user } = useAuthStore();
   const fetchPosts = usePostsStore((s) => s.fetchPosts);
@@ -45,6 +46,7 @@ export default function SubirScreen() {
   const [regionId, setRegionId] = useState<number | null>(null);
   const [comunaId, setComunaId] = useState<number | null>(null);
   const [categoria, setCategoria] = useState<CategoriaTipo>('naturaleza');
+  const [dificultad, setDificultad] = useState(1);
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -116,6 +118,7 @@ export default function SubirScreen() {
       region_id: regionId,
       comuna_id: comunaId,
       categoria,
+      dificultad,
     }).select().single();
 
     if (error || !post) {
@@ -141,7 +144,7 @@ export default function SubirScreen() {
       { text: 'Ver feed', onPress: () => router.replace('/(tabs)') },
     ]);
     setTitulo(''); setDescripcion(''); setImageUris([]);
-    setRegionId(null); setComunaId(null); setLat(null); setLng(null);
+    setRegionId(null); setComunaId(null); setLat(null); setLng(null); setDificultad(1);
   };
 
   return (
@@ -243,6 +246,22 @@ export default function SubirScreen() {
           ))}
         </View>
 
+        <Text style={styles.label}>Dificultad de acceso</Text>
+        <View style={styles.difficultyRow}>
+          {DIFICULTADES.map((d) => (
+            <TouchableOpacity
+              key={d.nivel}
+              style={[styles.difficultyChip, dificultad === d.nivel && { backgroundColor: d.color }]}
+              onPress={() => setDificultad(d.nivel)}
+            >
+              <Text style={[styles.difficultyChipText, dificultad === d.nivel && styles.difficultyChipTextActive]}>
+                {d.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <DifficultyBar nivel={dificultad} />
+
         <Text style={styles.label}>Ubicación GPS</Text>
         <TouchableOpacity style={styles.locationBtn} onPress={handleGetLocation} disabled={locLoading}>
           {locLoading ? (
@@ -303,6 +322,13 @@ const getStyles = (C: Colors) => StyleSheet.create({
   chipTextActive: { color: '#fff', fontWeight: '600' },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catEmoji: { fontSize: 14 },
+  difficultyRow: { flexDirection: 'row', gap: 8, marginBottom: 12, flexWrap: 'wrap' },
+  difficultyChip: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: C.surface,
+  },
+  difficultyChipText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
+  difficultyChipTextActive: { color: '#fff', fontWeight: '600' },
   locationBtn: { backgroundColor: C.surface, borderRadius: 12, padding: 14, alignItems: 'center' },
   locationBtnText: { color: C.primary, fontWeight: '500', fontSize: 14 },
   submitBtn: { backgroundColor: C.primary, borderRadius: 14, padding: 17, alignItems: 'center', marginTop: 28 },

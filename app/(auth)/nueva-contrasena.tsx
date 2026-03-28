@@ -2,7 +2,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -11,7 +11,7 @@ import type { Colors } from '@/constants';
 
 export default function NuevaContrasenaScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');

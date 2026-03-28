@@ -9,7 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -18,7 +18,7 @@ import type { Colors } from '@/constants';
 
 export default function Login() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

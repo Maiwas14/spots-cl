@@ -2,7 +2,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ScrollView, Alert, ActivityIndicator,
 } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -10,13 +10,14 @@ import { usePost } from '@/hooks/usePost';
 import { useRegiones } from '@/hooks/useRegiones';
 import { useComunas } from '@/hooks/useComunas';
 import { usePostsStore } from '@/stores/postsStore';
-import { useColors, CATEGORIAS } from '@/constants';
+import { useColors, CATEGORIAS, DIFICULTADES } from '@/constants';
 import type { Colors } from '@/constants';
 import { CategoriaTipo } from '@/types';
+import { DifficultyBar } from '@/components/DifficultyBar';
 
 export default function EditarLugarScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const { post, loading } = usePost(id);
@@ -26,6 +27,7 @@ export default function EditarLugarScreen() {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [categoria, setCategoria] = useState<CategoriaTipo>('naturaleza');
+  const [dificultad, setDificultad] = useState(1);
   const [regionId, setRegionId] = useState<number | null>(null);
   const [comunaId, setComunaId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,6 +40,7 @@ export default function EditarLugarScreen() {
       setTitulo(post.titulo);
       setDescripcion(post.descripcion ?? '');
       setCategoria(post.categoria);
+      setDificultad(post.dificultad ?? 1);
       setRegionId(post.region_id);
       setComunaId(post.comuna_id);
       setInitialized(true);
@@ -56,6 +59,7 @@ export default function EditarLugarScreen() {
         titulo: titulo.trim(),
         descripcion: descripcion.trim() || null,
         categoria,
+        dificultad,
         region_id: regionId,
         comuna_id: comunaId,
       })
@@ -136,6 +140,23 @@ export default function EditarLugarScreen() {
           ))}
         </View>
 
+        {/* Dificultad */}
+        <Text style={styles.label}>Dificultad de acceso</Text>
+        <View style={styles.difficultyRow}>
+          {DIFICULTADES.map((d) => (
+            <TouchableOpacity
+              key={d.nivel}
+              style={[styles.difficultyChip, dificultad === d.nivel && { backgroundColor: d.color }]}
+              onPress={() => setDificultad(d.nivel)}
+            >
+              <Text style={[styles.chipText, dificultad === d.nivel && styles.chipTextActive]}>
+                {d.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <DifficultyBar nivel={dificultad} />
+
         {/* Región */}
         <Text style={styles.label}>Región</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.optionsScroll}>
@@ -190,6 +211,11 @@ const getStyles = (C: Colors) => StyleSheet.create({
   charCount: { fontSize: 12, color: C.textMuted, textAlign: 'right', marginTop: 4 },
   categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   catEmoji: { fontSize: 14 },
+  difficultyRow: { flexDirection: 'row', gap: 8, marginBottom: 12, flexWrap: 'wrap' },
+  difficultyChip: {
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: C.surface,
+  },
   optionsScroll: { marginBottom: 4 },
   chip: {
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,

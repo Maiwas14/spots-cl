@@ -41,18 +41,15 @@ export interface Post {
   region_id: number | null;
   comuna_id: number | null;
   categoria: CategoriaTipo;
-  likes_count: number;
+  dificultad: number;
+  rating_avg: number;
+  rating_count: number;
   created_at: string;
   profiles?: Profile;
   regiones?: Region;
   comunas?: Comuna;
-  user_liked?: boolean;
   user_saved?: boolean;
-}
-
-export interface Like {
-  user_id: string;
-  post_id: string;
+  user_rating?: number;
 }
 
 export interface Guardado {

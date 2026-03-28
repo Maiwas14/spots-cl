@@ -10,7 +10,7 @@ import {
   Platform,
   ActionSheetIOS,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -23,7 +23,7 @@ import type { Colors } from '@/constants';
 
 export default function EditarPerfilScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { user, profile, setProfile } = useAuthStore();
   const { uploadAvatar } = useUploadImage();
@@ -74,11 +74,36 @@ export default function EditarPerfilScreen() {
 
   const handleSave = async () => {
     if (!user) return;
-    if (!username.trim()) {
-      Alert.alert('Error', 'El nombre de usuario no puede estar vacío');
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!normalizedUsername) {
+      Alert.alert('Error', 'El nombre de usuario no puede estar vacio');
+      return;
+    }
+    if (!/^[a-z0-9_]+$/.test(normalizedUsername)) {
+      Alert.alert('Error', 'El nombre de usuario solo puede contener letras minusculas, numeros y guiones bajos');
       return;
     }
     setSaving(true);
+
+    // Check username uniqueness (only if changed)
+    if (normalizedUsername !== profile?.username) {
+      const { data: existing, error: checkError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', normalizedUsername)
+        .neq('id', user.id)
+        .maybeSingle();
+      if (checkError) {
+        setSaving(false);
+        Alert.alert('Error', 'No se pudo verificar el nombre de usuario');
+        return;
+      }
+      if (existing) {
+        setSaving(false);
+        Alert.alert('Error', 'Este nombre de usuario ya esta en uso');
+        return;
+      }
+    }
 
     let avatarUrl = profile?.avatar_url ?? null;
     if (avatarUri) {

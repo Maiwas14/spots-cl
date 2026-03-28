@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Post } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { usePostsStore } from '@/stores/postsStore';
@@ -15,13 +16,7 @@ interface Props {
 
 export function PostCard({ post, height = 200 }: Props) {
   const user = useAuthStore((s) => s.user);
-  const toggleLike = usePostsStore((s) => s.toggleLike);
   const toggleSave = usePostsStore((s) => s.toggleSave);
-
-  const handleLike = () => {
-    if (!user) return;
-    toggleLike(post.id, user.id);
-  };
 
   const handleSave = () => {
     if (!user) return;
@@ -37,14 +32,15 @@ export function PostCard({ post, height = 200 }: Props) {
       <Image source={{ uri: post.imagen_url }} style={styles.image} contentFit="cover" />
       <View style={styles.overlay}>
         <TouchableOpacity onPress={handleSave} style={styles.saveBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={styles.saveIcon}>{post.user_saved ? '🔖' : '🏳️'}</Text>
+          <Ionicons name={post.user_saved ? 'bookmark' : 'bookmark-outline'} size={18} color="#fff" />
         </TouchableOpacity>
         <View style={styles.bottom}>
           <Text style={styles.title} numberOfLines={2}>{post.titulo}</Text>
-          <TouchableOpacity style={styles.likeRow} onPress={handleLike}>
-            <Text style={styles.likeIcon}>{post.user_liked ? '❤️' : '🤍'}</Text>
-            <Text style={styles.likeCount}>{post.likes_count}</Text>
-          </TouchableOpacity>
+          {(post.rating_count ?? 0) > 0 && (
+            <View style={styles.metaRow}>
+              <Text style={styles.ratingText}>⭐ {(post.rating_avg ?? 0).toFixed(1)}</Text>
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -64,7 +60,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   saveBtn: { alignSelf: 'flex-end' },
-  saveIcon: { fontSize: 16 },
   bottom: {
     backgroundColor: 'rgba(0,0,0,0.42)',
     borderRadius: 10,
@@ -72,7 +67,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: { color: '#fff', fontSize: 12, fontWeight: '600', lineHeight: 16 },
-  likeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  likeIcon: { fontSize: 12 },
-  likeCount: { color: '#fff', fontSize: 11, fontWeight: '500' },
+  metaRow: { flexDirection: 'row', alignItems: 'center' },
+  ratingText: { color: '#fff', fontSize: 11, fontWeight: '500' },
 });

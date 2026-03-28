@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,7 +20,7 @@ import type { Colors } from '@/constants';
 
 export default function Register() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,11 +33,32 @@ export default function Register() {
       Alert.alert('Error', 'Completa los campos requeridos');
       return;
     }
+    const normalizedUsername = username.trim().toLowerCase();
+    if (!/^[a-z0-9_]+$/.test(normalizedUsername)) {
+      Alert.alert('Error', 'El nombre de usuario solo puede contener letras minusculas, numeros y guiones bajos');
+      return;
+    }
     if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      Alert.alert('Error', 'La contrasena debe tener al menos 6 caracteres');
       return;
     }
     setLoading(true);
+    // Check username uniqueness
+    const { data: existing, error: checkError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', normalizedUsername)
+      .maybeSingle();
+    if (checkError) {
+      setLoading(false);
+      Alert.alert('Error', 'No se pudo verificar el nombre de usuario');
+      return;
+    }
+    if (existing) {
+      setLoading(false);
+      Alert.alert('Error', 'Este nombre de usuario ya esta en uso');
+      return;
+    }
     const { error } = await supabase.auth.signUp({
       email,
       password,

@@ -1,5 +1,5 @@
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { useState, useCallback } from 'react';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import { useState, useCallback, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import { supabase } from '@/lib/supabase';
@@ -11,11 +11,12 @@ import type { Colors } from '@/constants';
 
 export default function GuardadosScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { user } = useAuthStore();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -25,11 +26,18 @@ export default function GuardadosScreen() {
 
   const fetchSaved = async () => {
     setLoading(true);
-    const { data: saved } = await supabase
+    const { data: saved, error: savedError } = await supabase
       .from('guardados')
       .select('post_id')
       .eq('user_id', user!.id)
       .order('created_at', { ascending: false });
+
+    if (savedError) {
+      console.error('guardados fetch error:', savedError);
+      setPosts([]);
+      setLoading(false);
+      return;
+    }
 
     if (!saved || saved.length === 0) {
       setPosts([]);
@@ -37,18 +45,28 @@ export default function GuardadosScreen() {
       return;
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('posts')
       .select('*, regiones(id, nombre)')
       .in('id', saved.map((s) => s.post_id));
+
+    if (error) {
+      console.error('guardados posts fetch error:', error);
+    }
 
     if (data) setPosts(data.map((p) => ({ ...p, user_saved: true })) as Post[]);
     setLoading(false);
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchSaved();
+    setRefreshing(false);
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {loading ? (
+      {loading && !refreshing ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator color={COLORS.primary} />
         </View>
@@ -59,6 +77,17 @@ export default function GuardadosScreen() {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.grid}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={6}
+          windowSize={10}
+          initialNumToRender={6}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
           ListHeaderComponent={<Text style={styles.title}>Guardados</Text>}
           renderItem={({ item, index }) => (
             <PostCard post={item} height={index % 3 === 0 ? 230 : 185} />
@@ -66,8 +95,8 @@ export default function GuardadosScreen() {
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyIcon}>🔖</Text>
-              <Text style={styles.emptyText}>Nada guardado aún</Text>
-              <Text style={styles.emptySubtext}>Toca 🏳️ en cualquier lugar para guardarlo</Text>
+              <Text style={styles.emptyText}>Nada guardado aun</Text>
+              <Text style={styles.emptySubtext}>Toca el icono de guardado en cualquier lugar para guardarlo</Text>
             </View>
           }
         />

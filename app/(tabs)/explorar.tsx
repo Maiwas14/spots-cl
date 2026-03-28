@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
@@ -25,7 +25,7 @@ const CHILE_CENTER = { latitude: -35.6751, longitude: -71.543 };
 
 export default function ExplorarScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<number | null>(null);
@@ -46,7 +46,11 @@ export default function ExplorarScreen() {
 
     if (selectedRegion) query = query.eq('region_id', selectedRegion);
 
-    const { data } = await query;
+    const { data, error } = await query;
+    if (error) {
+      console.error('explorar fetchPostsWithLocation error:', error);
+      return;
+    }
     if (data) setPosts(data as unknown as Post[]);
   };
 
@@ -125,6 +129,10 @@ export default function ExplorarScreen() {
           data={posts}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={6}
+          windowSize={10}
+          initialNumToRender={6}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.listItem} onPress={() => router.push(`/lugar/${item.id}`)}>
               <Text style={styles.listTitle}>{item.titulo}</Text>

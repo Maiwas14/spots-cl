@@ -1,4 +1,5 @@
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useMemo } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +11,7 @@ import type { Colors } from '@/constants';
 
 export default function PublicProfileScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const { profile, posts, loading } = useProfile(id);
@@ -23,7 +24,7 @@ export default function PublicProfileScreen() {
     );
   }
 
-  const totalLikes = posts.reduce((acc, p) => acc + p.likes_count, 0);
+  const totalRatings = posts.reduce((acc, p) => acc + (p.rating_count ?? 0), 0);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -57,8 +58,8 @@ export default function PublicProfileScreen() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{totalLikes}</Text>
-                <Text style={styles.statLabel}>likes</Text>
+                <Text style={styles.statNumber}>{totalRatings}</Text>
+                <Text style={styles.statLabel}>valoraciones</Text>
               </View>
             </View>
 

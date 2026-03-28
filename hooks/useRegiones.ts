@@ -11,8 +11,12 @@ export function useRegiones() {
       .from('regiones')
       .select('*')
       .order('orden')
-      .then(({ data }) => {
-        if (data) setRegiones(data);
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('useRegiones error:', error);
+        } else if (data) {
+          setRegiones(data);
+        }
         setLoading(false);
       });
   }, []);

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useProfile } from '@/hooks/useProfile';
 import { PostCard } from '@/components/PostCard';
@@ -19,7 +19,7 @@ import type { Colors } from '@/constants';
 
 export default function PerfilScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { user, profile: authProfile, signOut } = useAuthStore();
   const { profile, posts, loading, refetch } = useProfile(user?.id ?? '');
@@ -34,7 +34,7 @@ export default function PerfilScreen() {
   };
 
   const displayProfile = profile || authProfile;
-  const totalLikes = posts.reduce((acc, p) => acc + p.likes_count, 0);
+  const totalRatings = posts.reduce((acc, p) => acc + (p.rating_count ?? 0), 0);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -68,8 +68,8 @@ export default function PerfilScreen() {
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statNumber}>{totalLikes}</Text>
-                <Text style={styles.statLabel}>likes</Text>
+                <Text style={styles.statNumber}>{totalRatings}</Text>
+                <Text style={styles.statLabel}>valoraciones</Text>
               </View>
             </View>
 

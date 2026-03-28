@@ -15,7 +15,7 @@ import {
 import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 
@@ -36,6 +36,9 @@ import type { Colors } from '@/constants';
 import { ImageCarousel } from '@/components/ImageCarousel';
 import { CommentsSection } from '@/components/CommentsSection';
 import { ZoomableImage } from '@/components/ZoomableImage';
+import { DifficultyBar } from '@/components/DifficultyBar';
+import { StarRating } from '@/components/StarRating';
+import { useRating } from '@/hooks/useRating';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -44,13 +47,15 @@ const IMAGE_HEIGHT = width * 0.78;
 
 export default function LugarScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const { post, loading, setPost } = usePost(id);
+  const { rate } = useRating(id);
   const { user } = useAuthStore();
   const [extraImages, setExtraImages] = useState<string[]>([]);
   const [zoomUri, setZoomUri] = useState<string | null>(null);
+  const [ratingSuccess, setRatingSuccess] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -59,23 +64,16 @@ export default function LugarScreen() {
       .select('url, orden')
       .eq('post_id', id)
       .order('orden')
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Error fetching post images:', error);
+          return;
+        }
         if (data && data.length > 1) {
           setExtraImages(data.map((d) => d.url));
         }
       });
   }, [id]);
-
-  const handleLike = async () => {
-    if (!user || !post) return;
-    const liked = post.user_liked;
-    setPost({ ...post, user_liked: !liked, likes_count: liked ? post.likes_count - 1 : post.likes_count + 1 });
-    if (liked) {
-      await supabase.from('likes').delete().eq('post_id', post.id).eq('user_id', user.id);
-    } else {
-      await supabase.from('likes').insert({ post_id: post.id, user_id: user.id });
-    }
-  };
 
   const handleSave = async () => {
     if (!user || !post) return;
@@ -99,6 +97,16 @@ export default function LugarScreen() {
   const handleShare = async () => {
     if (!post) return;
     await Share.share({ message: `Mira este spot en Chile: ${post.titulo} 📍`, title: post.titulo });
+  };
+
+  const handleRate = async (stars: number) => {
+    if (!post) return;
+    const result = await rate(stars);
+    if (result) {
+      setPost({ ...post, user_rating: stars, rating_avg: result.avg, rating_count: result.count });
+      setRatingSuccess(true);
+      setTimeout(() => setRatingSuccess(false), 2000);
+    }
   };
 
   const handleDelete = async () => {
@@ -150,11 +158,13 @@ export default function LugarScreen() {
           onClose={() => setZoomUri(null)}
         />
 
-        <TouchableOpacity activeOpacity={0.95} onPress={() => setZoomUri(post.imagen_url)} style={styles.imageContainer}>
+        <View style={styles.imageContainer}>
           {allImages.length > 1 ? (
-            <ImageCarousel urls={allImages} height={IMAGE_HEIGHT} />
+            <ImageCarousel urls={allImages} height={IMAGE_HEIGHT} onImagePress={(url) => setZoomUri(url)} />
           ) : (
-            <Image source={{ uri: post.imagen_url }} style={[styles.heroImage, { height: IMAGE_HEIGHT }]} contentFit="cover" />
+            <TouchableOpacity activeOpacity={0.95} onPress={() => setZoomUri(post.imagen_url)}>
+              <Image source={{ uri: post.imagen_url }} style={[styles.heroImage, { height: IMAGE_HEIGHT }]} contentFit="cover" />
+            </TouchableOpacity>
           )}
           <SafeAreaView edges={['top']} style={styles.heroControls}>
             <TouchableOpacity style={styles.iconBtn} onPress={() => router.back()}>
@@ -164,7 +174,7 @@ export default function LugarScreen() {
               <Ionicons name="share-outline" size={20} color="#fff" />
             </TouchableOpacity>
           </SafeAreaView>
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.content}>
           <View style={styles.tagsRow}>
@@ -183,6 +193,9 @@ export default function LugarScreen() {
                 <Text style={styles.tagText}>🏘️ {post.comunas.nombre}</Text>
               </View>
             )}
+            <View style={[styles.tag, styles.tagDifficulty]}>
+              <DifficultyBar nivel={post.dificultad ?? 1} />
+            </View>
           </View>
 
           <Text style={styles.title}>{post.titulo}</Text>
@@ -190,16 +203,24 @@ export default function LugarScreen() {
           <Text style={styles.timeAgo}>{timeAgo}</Text>
 
           <View style={styles.actionsRow}>
-            <TouchableOpacity style={[styles.actionBtn, post.user_liked && styles.actionBtnLiked]} onPress={handleLike}>
-              <Ionicons name={post.user_liked ? 'heart' : 'heart-outline'} size={18} color={post.user_liked ? '#ef4444' : COLORS.textMuted} />
-              <Text style={[styles.actionBtnText, post.user_liked && styles.actionBtnTextLiked]}>{post.likes_count}</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={[styles.actionBtn, post.user_saved && styles.actionBtnSaved]} onPress={handleSave}>
               <Ionicons name={post.user_saved ? 'bookmark' : 'bookmark-outline'} size={18} color={post.user_saved ? COLORS.primary : COLORS.textMuted} />
               <Text style={[styles.actionBtnText, post.user_saved && styles.actionBtnTextSaved]}>
                 {post.user_saved ? 'Guardado' : 'Guardar'}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.ratingContainer}>
+            <StarRating
+              avg={post.rating_avg ?? 0}
+              count={post.rating_count ?? 0}
+              userRating={post.user_rating}
+              onRate={handleRate}
+            />
+            {ratingSuccess && (
+              <Text style={styles.ratingSuccess}>Gracias por valorar!</Text>
+            )}
           </View>
 
           {post.lat && post.lng && (
@@ -282,7 +303,10 @@ const getStyles = (C: Colors) => StyleSheet.create({
   content: { padding: 20 },
   tagsRow: { flexDirection: 'row', gap: 8, marginBottom: 14, flexWrap: 'wrap' },
   tag: { backgroundColor: C.surface, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
+  tagDifficulty: { paddingVertical: 6 },
   tagText: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
+  ratingContainer: { marginBottom: 16 },
+  ratingSuccess: { fontSize: 13, color: C.success, fontWeight: '600', marginTop: 6 },
   title: { fontSize: 24, fontWeight: '800', color: C.text, marginBottom: 10, lineHeight: 30, letterSpacing: -0.3 },
   description: { fontSize: 15, color: C.textMuted, lineHeight: 22, marginBottom: 8 },
   timeAgo: { fontSize: 12, color: C.textMuted, marginBottom: 20 },
@@ -291,10 +315,8 @@ const getStyles = (C: Colors) => StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 12, borderRadius: 12, backgroundColor: C.surface,
   },
-  actionBtnLiked: { backgroundColor: '#fff0f0' },
   actionBtnSaved: { backgroundColor: '#f0f5f2' },
   actionBtnText: { fontSize: 14, color: C.textMuted, fontWeight: '500' },
-  actionBtnTextLiked: { color: '#ef4444' },
   actionBtnTextSaved: { color: C.primary },
   navigateBtn: {
     backgroundColor: C.primary, borderRadius: 12, padding: 15,

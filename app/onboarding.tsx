@@ -2,7 +2,7 @@ import {
   View, Text, StyleSheet, Dimensions,
   TouchableOpacity, FlatList,
 } from 'react-native';
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,15 +23,15 @@ const SLIDES = [
     subtitle: 'Sube fotos, agrega ubicación GPS y etiqueta la región y categoría.',
   },
   {
-    emoji: '❤️',
+    emoji: '⭐',
     title: 'Conecta con otros exploradores',
-    subtitle: 'Da like, guarda spots para más tarde y sigue a otros usuarios.',
+    subtitle: 'Valora spots, guarda tus favoritos para más tarde y sigue a otros usuarios.',
   },
 ];
 
 export default function OnboardingScreen() {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const flatRef = useRef<FlatList>(null);

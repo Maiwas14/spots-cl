@@ -17,8 +17,12 @@ export function useComunas(regionId: number | null) {
       .select('*')
       .eq('region_id', regionId)
       .order('nombre')
-      .then(({ data }) => {
-        if (data) setComunas(data);
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('useComunas error:', error);
+        } else if (data) {
+          setComunas(data);
+        }
         setLoading(false);
       });
   }, [regionId]);

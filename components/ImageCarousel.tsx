@@ -1,4 +1,5 @@
-import { View, ScrollView, Image, StyleSheet, Dimensions, Text } from 'react-native';
+import { View, ScrollView, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
 
 const { width } = Dimensions.get('window');
@@ -6,19 +7,29 @@ const { width } = Dimensions.get('window');
 interface Props {
   urls: string[];
   height?: number;
+  onImagePress?: (url: string) => void;
 }
 
-export function ImageCarousel({ urls, height = width * 0.78 }: Props) {
+export function ImageCarousel({ urls, height = width * 0.78, onImagePress }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
   if (urls.length === 0) return null;
 
   if (urls.length === 1) {
-    return <Image source={{ uri: urls[0] }} style={[styles.single, { height }]} resizeMode="cover" />;
+    return (
+      <TouchableOpacity activeOpacity={0.95} onPress={() => onImagePress?.(urls[0])}>
+        <Image
+          source={{ uri: urls[0] }}
+          style={[styles.single, { height }]}
+          contentFit="cover"
+          cachePolicy="memory-disk"
+        />
+      </TouchableOpacity>
+    );
   }
 
-  const handleScroll = (e: any) => {
+  const handleScroll = (e: { nativeEvent: { contentOffset: { x: number } } }) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / width);
     setActiveIndex(index);
   };
@@ -34,7 +45,14 @@ export function ImageCarousel({ urls, height = width * 0.78 }: Props) {
         scrollEventThrottle={16}
       >
         {urls.map((url, i) => (
-          <Image key={i} source={{ uri: url }} style={[styles.image, { height }]} resizeMode="cover" />
+          <TouchableOpacity key={i} activeOpacity={0.95} onPress={() => onImagePress?.(url)}>
+            <Image
+              source={{ uri: url }}
+              style={[styles.image, { height }]}
+              contentFit="cover"
+              cachePolicy="memory-disk"
+            />
+          </TouchableOpacity>
         ))}
       </ScrollView>
       {/* Dots */}

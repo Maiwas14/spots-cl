@@ -21,18 +21,29 @@ export function useComments(postId: string) {
 
   const fetchComments = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('comments')
       .select('*')
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
 
+    if (error) {
+      console.error('useComments fetch error:', error);
+      setComments([]);
+      setLoading(false);
+      return;
+    }
+
     if (data && data.length > 0) {
       const userIds = [...new Set(data.map((c) => c.user_id))];
-      const { data: profiles } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, username, avatar_url')
         .in('id', userIds);
+
+      if (profilesError) {
+        console.error('useComments profiles error:', profilesError);
+      }
 
       const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
       setComments(data.map((c) => ({ ...c, profiles: profileMap[c.user_id] })));
@@ -46,13 +57,20 @@ export function useComments(postId: string) {
     const { error } = await supabase
       .from('comments')
       .insert({ post_id: postId, user_id: userId, texto });
-    if (error) return false;
+    if (error) {
+      console.error('useComments addComment error:', error);
+      return false;
+    }
     await fetchComments();
     return true;
   };
 
   const deleteComment = async (commentId: string): Promise<void> => {
-    await supabase.from('comments').delete().eq('id', commentId);
+    const { error } = await supabase.from('comments').delete().eq('id', commentId);
+    if (error) {
+      console.error('useComments deleteComment error:', error);
+      return;
+    }
     setComments((prev) => prev.filter((c) => c.id !== commentId));
   };
 

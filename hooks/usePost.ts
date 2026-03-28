@@ -39,11 +39,15 @@ export function usePost(id: string) {
     let post = { ...postData, profiles: profileData ?? undefined };
 
     if (user) {
-      const [likeRes, saveRes] = await Promise.all([
-        supabase.from('likes').select('user_id').eq('post_id', id).eq('user_id', user.id).single(),
+      const [saveRes, ratingRes] = await Promise.all([
         supabase.from('guardados').select('user_id').eq('post_id', id).eq('user_id', user.id).single(),
+        supabase.from('ratings').select('stars').eq('post_id', id).eq('user_id', user.id).single(),
       ]);
-      post = { ...post, user_liked: !!likeRes.data, user_saved: !!saveRes.data };
+      post = {
+        ...post,
+        user_saved: !!saveRes.data,
+        user_rating: ratingRes.data?.stars ?? undefined,
+      };
     }
 
     setPost(post);

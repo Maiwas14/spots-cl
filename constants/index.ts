@@ -44,3 +44,10 @@ export const CATEGORIAS: { value: string; label: string; emoji: string }[] = [
 ];
 
 export const POSTS_PER_PAGE = 12;
+
+export const DIFICULTADES: { nivel: number; label: string; color: string }[] = [
+  { nivel: 1, label: 'Fácil', color: '#22c55e' },
+  { nivel: 2, label: 'Moderado', color: '#eab308' },
+  { nivel: 3, label: 'Difícil', color: '#f97316' },
+  { nivel: 4, label: 'Extremo', color: '#ef4444' },
+];
