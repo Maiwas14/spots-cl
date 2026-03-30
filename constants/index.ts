@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 const LIGHT = {
@@ -30,7 +31,7 @@ export type Colors = typeof LIGHT & { scheme: 'light' | 'dark' };
 
 export function useColors(): Colors {
   const scheme = useColorScheme() ?? 'light';
-  return { ...(scheme === 'dark' ? DARK : LIGHT), scheme };
+  return useMemo(() => ({ ...(scheme === 'dark' ? DARK : LIGHT), scheme }), [scheme]);
 }
 
 export const CATEGORIAS: { value: string; label: string; emoji: string }[] = [

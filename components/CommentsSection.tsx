@@ -2,7 +2,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, ActivityIndicator, Alert,
 } from 'react-native';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -18,7 +18,7 @@ interface Props {
 
 export function CommentsSection({ postId }: Props) {
   const COLORS = useColors();
-  const styles = getStyles(COLORS);
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const { comments, loading, addComment, deleteComment } = useComments(postId);
   const { user, profile } = useAuthStore();
@@ -88,7 +88,7 @@ export function CommentsSection({ postId }: Props) {
             {sending ? (
               <ActivityIndicator size="small" color={COLORS.primary} />
             ) : (
-              <Ionicons name="send" size={18} color={texto.trim() ? COLORS.primary : '#ccc'} />
+              <Ionicons name="send" size={18} color={texto.trim() ? COLORS.primary : COLORS.border} />
             )}
           </TouchableOpacity>
         </View>

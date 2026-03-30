@@ -173,7 +173,7 @@ const getStyles = (C: Colors) => StyleSheet.create({
   markerContainer: { alignItems: 'center' },
   markerEmoji: { fontSize: 28 },
   callout: { width: 160, padding: 8 },
-  calloutTitle: { fontSize: 13, fontWeight: '600', color: '#111' },
+  calloutTitle: { fontSize: 13, fontWeight: '600', color: C.text },
   calloutSub: { fontSize: 11, color: C.primary, marginTop: 4 },
   list: { padding: 16, gap: 12 },
   listItem: { backgroundColor: C.surface, borderRadius: 12, padding: 16 },

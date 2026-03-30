@@ -1,4 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useMemo } from 'react';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 interface Props {
   avg: number;
@@ -8,6 +11,9 @@ interface Props {
 }
 
 export function StarRating({ avg, count, userRating, onRate }: Props) {
+  const COLORS = useColors();
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
+
   return (
     <View style={styles.container}>
       <View style={styles.stars}>
@@ -19,7 +25,7 @@ export function StarRating({ avg, count, userRating, onRate }: Props) {
               onPress={onRate ? () => onRate(star) : undefined}
               disabled={!onRate}
               activeOpacity={0.7}
-              hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Text style={[styles.star, filled ? styles.starFilled : styles.starEmpty]}>
                 ★
@@ -40,12 +46,12 @@ export function StarRating({ avg, count, userRating, onRate }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (C: Colors) => StyleSheet.create({
   container: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   stars: { flexDirection: 'row', gap: 2 },
   star: { fontSize: 24 },
-  starFilled: { color: '#f59e0b' },
-  starEmpty: { color: '#d1d5db' },
-  summary: { fontSize: 13, color: '#888', fontWeight: '500' },
-  noRating: { fontSize: 13, color: '#aaa' },
+  starFilled: { color: C.accent },
+  starEmpty: { color: C.border },
+  summary: { fontSize: 13, color: C.textMuted, fontWeight: '500' },
+  noRating: { fontSize: 13, color: C.textMuted },
 });

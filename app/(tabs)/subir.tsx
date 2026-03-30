@@ -307,7 +307,7 @@ const getStyles = (C: Colors) => StyleSheet.create({
   thumb: { width: '100%', height: '100%' },
   mainBadge: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
-    backgroundColor: 'rgba(28,74,48,0.8)', paddingVertical: 3, alignItems: 'center',
+    backgroundColor: C.primary + 'CC', paddingVertical: 3, alignItems: 'center',
   },
   mainBadgeText: { color: '#fff', fontSize: 10, fontWeight: '700' },
   removeBtn: { position: 'absolute', top: 4, right: 4 },

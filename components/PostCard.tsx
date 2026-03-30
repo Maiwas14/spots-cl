@@ -1,10 +1,13 @@
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { useMemo } from 'react';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Post } from '@/types';
 import { useAuthStore } from '@/stores/authStore';
 import { usePostsStore } from '@/stores/postsStore';
+import { useColors } from '@/constants';
+import type { Colors } from '@/constants';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 36) / 2;
@@ -17,6 +20,8 @@ interface Props {
 export function PostCard({ post, height = 200 }: Props) {
   const user = useAuthStore((s) => s.user);
   const toggleSave = usePostsStore((s) => s.toggleSave);
+  const COLORS = useColors();
+  const styles = useMemo(() => getStyles(COLORS), [COLORS]);
 
   const handleSave = () => {
     if (!user) return;
@@ -47,11 +52,11 @@ export function PostCard({ post, height = 200 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (C: Colors) => StyleSheet.create({
   card: {
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: '#d8d8d8',
+    backgroundColor: C.surface,
   },
   image: { width: '100%', height: '100%', position: 'absolute' },
   overlay: {
